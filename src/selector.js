@@ -1146,9 +1146,10 @@ function matcherFromGroupMatchers( elementMatchers, setMatchers ) {
 	var bySet = setMatchers.length > 0,
 		byElement = elementMatchers.length > 0,
 		superMatcher = function( seed, context, xml, results, outermost ) {
-			var elem, j, matcher,
-				matchedCount = 0,
+			var elem,
+				j = 0,
 				i = "0",
+				matchedCount = 0,
 				unmatched = seed && [],
 				setMatched = [],
 				contextBackup = outermostContext,
@@ -1169,9 +1170,9 @@ function matcherFromGroupMatchers( elementMatchers, setMatchers ) {
 			}
 
 			// Add elements passing elementMatchers directly to results
-			for ( ; ( elem = elems[ i ] ) != null; i++ ) {
+			for ( ; i < elems.length; i++ ) {
+				elem = elems[ i ];
 				if ( byElement && elem ) {
-					j = 0;
 
 					// Support: IE 11+
 					// IE sometimes throws a "Permission denied" error when strict-comparing
@@ -1181,8 +1182,8 @@ function matcherFromGroupMatchers( elementMatchers, setMatchers ) {
 						setDocument( elem );
 						xml = !documentIsHTML;
 					}
-					while ( ( matcher = elementMatchers[ j++ ] ) ) {
-						if ( matcher( elem, context || document, xml ) ) {
+					for ( j = 0; j < elementMatchers.length; j++ ) {
+						if ( elementMatchers[ j ]( elem, context || document, xml ) ) {
 							push.call( results, elem );
 							break;
 						}
@@ -1196,7 +1197,7 @@ function matcherFromGroupMatchers( elementMatchers, setMatchers ) {
 				if ( bySet ) {
 
 					// They will have gone through all possible matchers
-					if ( ( elem = !matcher && elem ) ) {
+					if ( ( elem = j >= elementMatchers.length && elem ) ) {
 						matchedCount--;
 					}
 
@@ -1219,9 +1220,8 @@ function matcherFromGroupMatchers( elementMatchers, setMatchers ) {
 			// case, which will result in a "00" `matchedCount` that differs from `i` but is also
 			// numerically zero.
 			if ( bySet && i !== matchedCount ) {
-				j = 0;
-				while ( ( matcher = setMatchers[ j++ ] ) ) {
-					matcher( unmatched, setMatched, context, xml );
+				for ( j = 0; j < setMatchers.length; j++ ) {
+					setMatchers[ j ]( unmatched, setMatched, context, xml );
 				}
 
 				if ( seed ) {
